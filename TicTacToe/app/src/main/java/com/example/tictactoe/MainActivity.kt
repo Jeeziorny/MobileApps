@@ -10,14 +10,11 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
 
     lateinit var buttons: Array<Button>
-    var board: Array<Int> = arrayOf(0, 0, 0, 0, 0,
-                                    0, 0, 0, 0, 0,
-                                    0, 0, 0, 0, 0,
-                                    0, 0, 0, 0, 0,
-                                    0, 0, 0, 0, 0)
+    var board = IntArray(25)
+    var sumOnLine = IntArray(12)
 
-    enum class owner{
-        USER, BOT, NONE
+    enum class winner {
+        USER, BOT, NONE, NOTYET
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,38 +30,106 @@ class MainActivity : AppCompatActivity() {
     fun userService(view: View) {
         (view as Button).text = "O"
         view.setOnClickListener(null)
+        board[buttons.indexOf(view)] = 1
+        sumUpdate()
+        when (isFinished()) {
+            winner.USER -> announce(winner.USER)
+            winner.BOT -> announce(winner.BOT)
+            winner.NONE -> announce(winner.NONE)
+            else -> bot()
+        }
     }
-    //TODO:
-    // -message after finish,
-    // -bot,
-    // -
-    fun bot() {
 
+    fun again(view: View) {
+        buttons.forEach { it.setOnClickListener { e -> userService(it) } }
+        message.text = "Let's try.."
     }
 
-    fun isFinished() {
-        var Hsum = 0
-        var Vsum = 0
+    fun sumUpdate() {
+        var index = 0
+        for(i in 0..11) sumOnLine[i] = 0
+        for (j in 0..20 step 5) {
+            for (i in 0..4) {
+                sumOnLine[index] += board[j + i]
+            }
+            index++
+        }
         for (i in 0..4) {
-            for (j in 0..4) {
-                Hsum += board[i*5+j]
-                Vsum += board[i + j*5]
+            for (j in 0..20 step 5) {
+                sumOnLine[index] += board[j + i]
             }
-            if (Hsum == 5 || Vsum == 5) {
-                Log.d("WINNER", "PLAYER")
-                //TODO: add functionality
-            } else if (Hsum == -5 || Vsum == -5) {
-                Log.d("WINNER", "BOT")
+            index++
+        }
+        sumOnLine[index++] = board[0]+board[6]+board[12]+board[18]+board[24]
+        sumOnLine[index] = board[20]+board[16]+board[12]+board[8]+board[4]
+    }
+
+    fun bot() {
+        var index = 0
+        for (i in 1..11) {
+            if (sumOnLine[i] > sumOnLine[index])
+                index = i
+        }
+        if (index < 5) {
+            for (i in 0..4) {
+                if (board[index*5+i] == 0) {
+                    board[index*5+i] = -1
+                    buttons[index*5+i].text = "X"
+                    break
+                }
             }
-            Hsum = 0
-            Vsum = 0
+        } else if (index < 10) {
+            for (i in 0..20 step 5) {
+                if (board[index%5+i] == 0) {
+                    board[index%5+i] = -1
+                    buttons[index%5+i].text = "X"
+                    break
+                }
+            }
+        } else if (index == 10) {
+            for (i in 0..24 step 6) {
+                if (board[i] == 0) {
+                    board[i] = -1
+                    buttons[i].text = "X"
+                    break
+                }
+            }
+        } else if (index == 11) {
+            for (i in 4..20 step 4) {
+                if (board[i] == 0) {
+                    board[i] = -1
+                    buttons[i].text = "X"
+                    break
+                }
+            }
+        } else {
+            for (i in 0..24) {
+                if(board[i] == 0) {
+                    board[i] = -1
+                    buttons[i].text = "X"
+                    break
+                }
+            }
         }
-        var a = board[0]+board[6]+board[12]+board[18]+board[24]
-        var b = board[4]+board[8]+board[12]+board[16]+board[20]
-        if (a == 5 || b == 5) {
-            Log.d("WINNER", "PLAYER")
-        } else if (b == -5 || b == -5) {
-            Log.d("WINNER", "BOT")
+        sumUpdate()
+    }
+
+    fun announce(w: winner) {
+        when (w) {
+            winner.USER -> message.text = "You won! :)"
+            winner.BOT  -> message.text = "Bot won :("
+            else -> message.text = "nobody won, maybe again?"
         }
+    }
+
+    fun isFinished() : winner {
+        if
+        for (i in sumOnLine) {
+            when(i) {
+                5  -> return winner.USER
+                -5 -> return winner.BOT
+            }
+        }
+        return winner.NOTYET
     }
 }
