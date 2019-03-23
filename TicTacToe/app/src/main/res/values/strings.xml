@@ -3,4 +3,5 @@
     <string name="empty">""</string>
     <string name="cross">X</string>
     <string name="circle">O</string>
+    <string name="again">Try Again!</string>
 </resources>
