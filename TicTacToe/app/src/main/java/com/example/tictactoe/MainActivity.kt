@@ -12,7 +12,6 @@ class MainActivity : AppCompatActivity() {
     var bd = IntArray(25)
     var sumOnLine = IntArray(12)
 
-
     enum class winner {
         USER, BOT, NONE, NOTYET
     }

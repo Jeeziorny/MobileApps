@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Gallery</string>
+    <string name="firstDescription">to add description, please long click</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
